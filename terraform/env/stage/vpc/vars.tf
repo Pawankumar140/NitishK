@@ -1,5 +1,5 @@
 variable "aws_region" {
-  default = "ap-south-1"
+  default = "eu-west-1"
 }
 
 variable "cidr_block" {
@@ -18,6 +18,17 @@ variable "env" {
   type = string
 }
 
+
+variable "public_subnet" {
+    type = string
+    default = "172.18.1.0/24"  
+}
+
+
+variable "private_subnet" {
+    type = string
+    default = "172.18.2.0/24"  
+}
 
 # variable "AMIS" {
 #   type = "map"

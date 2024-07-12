@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
-    bucket = "nitishk"
+    bucket = "nitishk1"
     key = "terraform/state/vpc"
-    region = "ap-south-1"
+    region = "eu-west-1"
   }
 }
