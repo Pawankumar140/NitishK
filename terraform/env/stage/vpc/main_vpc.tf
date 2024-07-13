@@ -1,4 +1,4 @@
-module "stage-vpc" {
+module "vpc" {
   source = "../../../_modules/vpc"
 
   aws_region = var.aws_region
@@ -10,6 +10,5 @@ module "stage-vpc" {
   public_subnet     = ["172.18.1.0/24", "172.18.2.0/24", "172.18.3.0/24"]
   private_subnet    = ["172.18.4.0/24", "172.18.5.0/24", "172.18.6.0/24"]
 
-
-
 }
+

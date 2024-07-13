@@ -11,11 +11,10 @@ module "rds" {
 
   instance_class = "db.t3.micro"
   engine  = "mysql"
-  engine_version = "5.7"
+  engine_version = "8.0.35"
   
   username = "demodbroot"
   manage_master_user_password = true
-
 
   }
 
