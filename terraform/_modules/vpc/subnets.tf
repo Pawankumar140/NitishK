@@ -1,47 +1,82 @@
+locals {
+  len_public_subnets      = max(length(var.public_subnet))
+  len_private_subnets     = max(length(var.private_subnet))
+
+    max_subnet_length = max(
+        local.len_private_subnets,
+        local.len_public_subnets)
+}
+
+
+# Create Public Subnet
 resource "aws_subnet" "public_subnet" {
-  vpc_id     = aws_vpc.vpc.id
-  cidr_block = var.public_subnet
+  count = local.len_public_subnets
 
+  vpc_id     = aws_vpc.vpc.id
+  cidr_block = element(concat(var.public_subnet, [""]), count.index)
+  availability_zone = element(var.azs, count.index)
+  
+  
   tags = {
-    Name = "${var.project}-${var.env}-pub-subnet"
+      Name = try(
+        var.public_subnet_names[count.index],
+        format("${var.public_subnet_suffix}-%s", element(var.azs, count.index))
+      )
   }
 }
 
-
-
+# Create Private Subnet
 resource "aws_subnet" "private_subnet" {
+  count = local.len_private_subnets
+
   vpc_id     = aws_vpc.vpc.id
-  cidr_block = var.private_subnet
-
+  cidr_block = element(concat(var.private_subnet, [""]), count.index)
+  availability_zone = element(var.azs, count.index)
+  
+  
   tags = {
-    Name = "${var.project}-${var.env}-pvt-subnet"
+      Name = try(
+        var.private_subnet_names[count.index],
+        format("${var.private_subnet_suffix}-%s", element(var.azs, count.index))
+      )
   }
 }
 
-
+# Create aws public route table
 resource "aws_route_table" "public_rtb" {
-  vpc_id = aws_vpc.vpc.id
+  count = 1
 
+  vpc_id = aws_vpc.vpc.id
   tags = {
-    Name = "${var.project}-${var.env}-pub-rtb"
+      Name = "${var.public_subnet_suffix}-rtb"      
   }
-
 }
 
-resource "aws_route_table_association" "public" {
-  route_table_id = aws_route_table.public_rtb.id
-  subnet_id      = aws_subnet.public_subnet.id
-}
 
+# Create aws private route table
 resource "aws_route_table" "private_rtb" {
-  vpc_id = aws_vpc.vpc.id
+  count = 1
 
+  vpc_id = aws_vpc.vpc.id
   tags = {
-    Name = "${var.project}-${var.env}-pvt-rtb"
-  }  
+      Name = "${var.private_subnet_suffix}-rtb"      
+  }
 }
 
+
+# Create subnet associate with public route table
+resource "aws_route_table_association" "public" {
+  count = local.len_public_subnets
+
+  route_table_id = aws_route_table.public_rtb[0].id
+  subnet_id      = element(aws_subnet.public_subnet[*].id, count.index)
+}
+
+
+# Create subnet associate with private route table
 resource "aws_route_table_association" "private" {
-  route_table_id = aws_route_table.private_rtb.id
-  subnet_id      = aws_subnet.private_subnet.id
+  count = local.len_private_subnets
+
+  route_table_id = aws_route_table.private_rtb[0].id
+  subnet_id      = element(aws_subnet.private_subnet[*].id, count.index)
 }

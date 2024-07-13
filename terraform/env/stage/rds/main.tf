@@ -1,17 +1,21 @@
 module "rds" {
   source = "../../../_modules/rds"
 
-  db_name = "${var.project}-${var.env}-internet-gateway"
+# Common Variable to use in modules
+  env = var.env
+  project = var.project
+  aws_region = var.aws_region
+
+  db_name = "${var.project}${var.env}rdsdb"
+  db_port = "3210"
+
+  instance_class = "db.t3.micro"
+  engine  = "mysql"
+  engine_version = "5.7"
   
+  username = "demodbroot"
+  manage_master_user_password = true
+
+
   }
 
-variable "project" {
-    default = "demo"
-    type = string
-  
-}
-
-variable "env" {
-  default = "stage"
-  type = string
-}
